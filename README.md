@@ -16,7 +16,7 @@ When the accessory is called from the menu, an alert box will be displayed showi
 
 Copy ``AUTODST.PRG`` to the ``AUTO`` folder of the boot drive.
 
-The accessory sleeps for one minute between checks. For the last 120 seconds before a time change, the sleep interval is reduced to just one second to be as accurate as possible.
+The accessory sleeps for one minute between checks. For the last 120 seconds before a time change, the sleep interval is reduced to just one second to be as accurate as possible. When started, it checks whether there was a time change since the last time the machine was switched off, too.
 
 Startup and error messages are written to ``AUTODST.LOG``. DST status changes are also logged here.
 
