@@ -42,7 +42,8 @@ LDLIBS_PRG	 =
 ACC      = autodst.acc
 PRG		 = autodst.prg
 INI		 = autodst.ini
-ALL_LANGUAGES= en_US en_GB de_DE de_AT
+ALL_LANG_INC	= $(wildcard lang/*.h)
+ALL_LANGUAGES	= $(ALL_LANG_INC:lang/%.h=%)
 SRC_ACC	 = accmain.c config.c log.c misc.c rules.c
 SRC_PRG	 = prgmain.c config.c log.c misc.c rules.c
 
