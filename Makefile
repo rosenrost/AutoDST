@@ -1,4 +1,6 @@
-LIBCMINI_DIR = /usr/local/lib/libcmini
+ifeq (,$(LIBCMINI_DIR))
+ LIBCMINI_DIR = /usr/local/lib/libcmini
+endif
 
 PREFIX      = m68k-atari-mint-
 
