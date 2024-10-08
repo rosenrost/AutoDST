@@ -1,56 +1,72 @@
 # AutoDST
-An accessory to automatically switch to and back from daylight saving time.
+
+A small software package for Atari ST/STE/TT and such to automatically switch to and back from daylight saving time.
+
+The package consists of an AUTO folder program to catch up with time changes at boot time if necessary and an accessory which sleeps in the background until the clock needs to be adjusted.
+
+If you do not plan on running the machine at night, installing the AUTO folder program and not using the accessory is probably sufficient.
 
 ## Usage
 
-Choose your preferred language in the ``bins`` directory and copy its contents to your boot drive:
+Choose your preferred language in the ``bins`` directory and copy the contents to your boot drive:
 
-Copy ``AUTODST.ACC`` and ``AUTODST.INI`` to the root folder of your boot drive and edit the variables in ``AUTODST.INI`` as described below. Make sure to set the current DST status correctly!
-When calling the accessory from the menu, it shows an alert box with information about the current date, time and DST status and the date and time when the next change will occur.
+Copy ``AUTODST.ACC`` and ``AUTODST.INI`` to the root folder of the boot drive and edit the variables in ``AUTODST.INI`` as described below. Make sure to set the current DST status correctly!
 
-You can copy ``AUTODST.PRG`` to the ``AUTO`` folder of your boot drive to switch when booting if necessary.
+When the accessory is called from the menu, an alert box will be displayed showing the current date and time of the next time change.
 
-Startup messages and error messages will be written to ``AUTODST.LOG``. DST status changes will be logged here, too.
+Copy ``AUTODST.PRG`` to the ``AUTO`` folder of the boot drive.
+
+The accessory sleeps for one minute between checks. For the last 120 seconds before a time change, the sleep interval is reduced to just one second to be as accurate as possible.
+
+Startup and error messages are written to ``AUTODST.LOG``. DST status changes are also logged here.
 
 ## Configuration
-``AUTODST.INI`` can be edited with any text editor. The sample INI is provided with explanatory comments.
-However, the following variables can be set (cursives are optional):
 
-``status`` current DST status (0=off, 1=on)
+``AUTODST.INI`` can be edited with any text editor. The example file is provided with explanatory comments.<br/>
 
-``tzdst`` time zone name for standard time (optional, is used in log messages and the alert box only)
+The following variables are used:
 
-``tzdst`` time zone name for daylight saving time (optional, is used in log messages and the alert box only)
+``status`` Current DST status (0=off, 1=on)
 
-``from`` rule for the beginning of daylight saving time
+``tzdst`` Name of the time zone for standard time (optional, only used in the log messages and the accessory's alert box)
 
-``to`` rule for returning to standard time
+``tzdst`` Name of the time zone for daylight saving time (optional, only used in the log messages and the accessory's alert box)
+
+``from`` Rule for the start of daylight saving time
+
+``to`` Rule for the end of daylight saving time
+
+Also note the following rules:
+* Spaces at the beginning of a line will be removed.
+* Blank lines are ignored.
+* Lines starting with "#" are considered comments and are therefore also ignored.
+* It is not possible to add comments at the end of a line.
 
 ## Rules ##
 
-Each rule consists of three fields separated by blank characters: day, month, time (24 hour format).
+Each rule consists of three fields separated by spaces: day, month, time (24-hour format).
 
-Day: Weekday (sun, mon, tue, wed, thu, fri, sat) followed by an indicator (1..4=first..fourth, -1..-4=last..fourth to last)
-Month:  jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec
+Day: weekday (Sun, Mon, Tue, Wed, Thu, Fri, Sat) followed by an indicator (1..4=first..fourth, -1..-4=last..fourth to last)<br/>
+Month: Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec<br/>
 Time: HH:MM
 
-The time value can be 24:00 and beyond, so you can create rules such as "the day following the last Thursday in October" (see example for Egypt below).
+The time value can also be 24:00 and beyond, so you can create rules like "the day following the last Thursday in October" (see example for Egypt below).
 
 ### Examples ###
 
-European Summer Time is from the last Sunday in March at 2:00 AM until the last Sunday in October at 3:00 AM:
+European Summer Time is from the last Sunday in March at 2:00 AM to the last Sunday in October at 3:00 AM:
 ```
 from=Sun-1 Mar 02:00
 to=Sun-1 Oct 03:00
 ```
 
-USA: Second Sunday in March at 2:00 AM until first Sunday in November at 2:00 AM
+USA: Second Sunday in March at 2:00 AM to first Sunday in November at 2:00 AM
 ```
 from=Sun+2 Mar 02:00
 to=Sun+1 Nov 02:00
 ```
 
-Egyptian Summer Time in 2024 is from the last Friday in April at 12:00 AM until the day following the last Thursday in October at 12:00 AM.
+Egyptian Summer Time in 2024 is from the last Friday in April at 12:00 AM to the day following the last Thursday in October at 12:00 AM.
 ```
 from=Fri-1 Apr 00:00
 to=Thu-1 Oct 24:00
@@ -58,13 +74,12 @@ to=Thu-1 Oct 24:00
 
 ## Translations ##
 
-Adding new translations is very simple. To add e.g. Italian (Italy) translations:
+Adding new translations is very easy. For example, to add Italian (Italy) translations:
 * Copy ``lang/en_US.h`` to ``lang/it_IT.h``
 * Make your translations in ``lang/it_IT.h``
-* Add "``it_IT``" to the variable ``LANGUAGES`` in the ``Makefile``
 * Run ``make it_IT`` or ``make``
 
-After that you can find Italian executables in ``bins/it_IT``.
+After that, you can find Italian executables in ``bins/it_IT``.
 
-For the date and time format specifiers see *strftime(3P)*.<br/>
+For date and time format specifiers, see *strftime(3P)*.<br/>
 Please note that the following specifiers are not supported: ``%c``, ``%j``, ``%j``, ``%U``, ``%W``, ``%w``, ``%X``, ``%x``, ``%Z``.
