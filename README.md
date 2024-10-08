@@ -72,6 +72,22 @@ from=Fri-1 Apr 00:00
 to=Thu-1 Oct 24:00
 ```
 
+## Compiling ##
+
+To compile the software, Vincent Riviäre's *m68k-atari-mint* cross-tools and the *libcmini* library are required.
+
+Just type ``make`` to compile for all languages. Or, for example, ``make de_AT`` to compile for Austrian German only.
+
+If the library is not installed in ``/usr/local/lib/libcmini``, the path must be specified when calling ``make``:
+
+```
+$ make LIBCMINI_DIR=/your/path/to/libcmini
+```
+Or for e.g. British English only:
+```
+$ make LIBCMINI_DIR=/your/path/to/libcmini en_UK
+```
+
 ## Translations ##
 
 Adding new translations is very easy. For example, to add Italian (Italy) translations:
