@@ -22,19 +22,15 @@ endif
 CC	    = $(PREFIX)gcc.exe
 AR	    = $(PREFIX)ar.exe
 RANLIB	    = $(PREFIX)ranlib.exe
-MAKE	    = make
+MAKE	    = make --no-print-directory
 CP          = cp -a
 MV          = mv
 RM          = rm -f
 MKDIR       = mkdir -p
-SRCDIR      = $(UPDIR)src
-PRGDIR	    = $(UPDIR)
+ZIP         = zip -rq
 DEPEND      = .depend
 CFLAGS      = -Wall -pedantic -fomit-frame-pointer $(CFLAGS_2) $(CSTD)
-STRIPFLAGS  = -s -R .comment -R .gnu.version
 LDFLAGS	    = -s $(LDFLAGS_2)
-TOUPPER     = | tr "[:lower:]" "[:upper:]"
-TOLOWER     = | tr "[:upper:]" "[:lower:]"
 
 
 
@@ -48,6 +44,16 @@ ALL_LANG_INC	= $(wildcard lang/*.h)
 ALL_LANGUAGES	= $(ALL_LANG_INC:lang/%.h=%)
 SRC_ACC	 = accmain.c config.c log.c misc.c rules.c
 SRC_PRG	 = prgmain.c config.c log.c misc.c rules.c
+
+VERSION		= $(file < VERSION)
+RELEASEDIR	= release
+RELEASEFILE	= autodst-$(VERSION).zip
+
+ifeq (,$(VERSION))
+ VERSION = 0
+endif
+
+CFLAGS += -DVERSION="\"$(VERSION)\""
 
 ifeq (,$(LANGUAGE))
 	EXECDIR = bins
@@ -64,13 +70,15 @@ OBJ_ACC	 = $(SRC_ACC:%.c=$(OBJDIR)/%.o)
 OBJ_PRG	 = $(SRC_PRG:%.c=$(OBJDIR)/%.o)
 
 
-.PHONY:	all clean clean-all depend dep $(ALL_LANGUAGES) $(INI) $(OBJDIR) clean-$(LANGUAGE)
+.PHONY:	all clean clean-all depend dep release $(ALL_LANGUAGES) $(INI) $(OBJDIR) clean-$(LANGUAGE)
 
 
 all:	$(ALL_LANGUAGES)
 
 $(ALL_LANGUAGES):
-	$(MAKE) LANGUAGE=$@ $(ACC) $(PRG) $(INI)
+	@echo "Building $@."
+	@$(MAKE) LANGUAGE=$@ $(ACC) $(PRG) $(INI)
+	@echo "Done."
 
 clean:	$(CLEAN)
 
@@ -78,26 +86,43 @@ clean-all:
 	@for lang in $(ALL_LANGUAGES); do $(MAKE) LANGUAGE=$$lang clean; done
 
 clean-$(LANGUAGE):
-	$(RM) $(OBJ_ACC) $(EXECDIR)/$(ACC) $(OBJ_PRG) $(EXECDIR)/$(PRG)
+	@echo "Removing object files and executables for $(LANGUAGE)."
+	@$(RM) $(OBJ_ACC) $(OBJ_PRG)
+	@$(RM) -r $(EXECDIR)
 
 depend dep:
-	$(CC) $(CFLAGS) -MM $(SRC_ACC) $(SRC_PRG) >$(DEPEND)
+	@echo "Generating dependencies."
+	@$(CC) $(CFLAGS) -MM $(SRC_ACC) $(SRC_PRG) >$(DEPEND)
+
+release:	all
+	@echo "Creating ZIP for release v$(VERSION)"; \
+	$(MKDIR) $(RELEASEDIR) && \
+	$(CP) $(ALL_LANGUAGES:%=$(EXECDIR)/%) $(RELEASEDIR) && \
+	pushd $(RELEASEDIR) >/dev/null && \
+	$(ZIP) $(RELEASEFILE) $(ALL_LANGUAGES) && \
+	$(RM) -r $(ALL_LANGUAGES) && \
+	popd >/dev/null && \
+	echo "$(RELEASEDIR)/$(RELEASEFILE) successfully created." || \
+	echo "Failed!"
 
 $(ACC):	$(OBJDIR) $(OBJ_ACC)
-	@test -d $(EXECDIR) || $(MKDIR) -p $(EXECDIR)
-	$(CC) $(STARTUP) -o $(EXECDIR)/$(ACC) $(OBJ_ACC) $(LDLIBS_ACC) $(LDFLAGS)
+	@$(MKDIR) -p $(EXECDIR)
+	@echo " Linking $(ACC)."
+	@$(CC) $(STARTUP) -o $(EXECDIR)/$(ACC) $(OBJ_ACC) $(LDLIBS_ACC) $(LDFLAGS)
 
 $(PRG): $(OBJDIR) $(OBJ_PRG)
-	@test -d $(EXECDIR) || $(MKDIR) -p $(EXECDIR)
-	$(CC) $(STARTUP) -o $(EXECDIR)/$(PRG) $(OBJ_PRG) $(LDLIBS_PRG) $(LDFLAGS)
+	@$(MKDIR) -p $(EXECDIR)
+	@echo " Linking $(PRG)."
+	@$(CC) $(STARTUP) -o $(EXECDIR)/$(PRG) $(OBJ_PRG) $(LDLIBS_PRG) $(LDFLAGS)
 
 $(INI):
-	$(CP) $(INI) $(EXECDIR)
+	@echo " Copying $(INI)."
+	@$(CP) $(INI) $(EXECDIR)
 
 $(OBJDIR):
-	$(MKDIR) $(OBJDIR)
+	@$(MKDIR) $(OBJDIR)
 
 $(OBJDIR)/%.o:	%.c
-	$(CC) $(CFLAGS) $(OPTFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(OPTFLAGS) -c $< -o $@
 
 -include $(DEPEND)

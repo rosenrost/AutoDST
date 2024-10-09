@@ -11,9 +11,6 @@
 #include LANGFILE
 
 
-#define VERSION  "1.0.0"
-
-
 /* C library */
 extern short _app;
 
