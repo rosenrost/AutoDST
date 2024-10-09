@@ -8,7 +8,7 @@ If you do not plan on running the machine at night, installing the AUTO folder p
 
 ## Usage
 
-Choose your preferred language in the ``bins`` directory and copy the contents to your boot drive:
+Choose your preferred language in the ``bins`` directory or from a certain release archive and copy the contents to your boot drive:
 
 Copy ``AUTODST.ACC`` and ``AUTODST.INI`` to the root folder of the boot drive and edit the variables in ``AUTODST.INI`` as described below. Make sure to set the current DST status correctly!
 
