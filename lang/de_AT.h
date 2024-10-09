@@ -7,19 +7,14 @@
  */
 
 
-#include "de_DE.h"
+#include "lang/de_DE.h"
 
 
 /* common */
-
-#ifdef MDAY_JANUARY
-# undef MDAY_JANUARY
-#endif /* defined MDAY_JANUARY */
+#undef MDAY_JANUARY
 #define MDAY_JANUARY  "J„nner"
 
-#ifdef MDAY_JAN_ABBR
-# undef MDAY_JAN_ABBR
-#endif /* defined MDAY_JAN_ABBR */
+#undef MDAY_JAN_ABBR
 #define MDAY_JAN_ABBR  "J„n"
 
 

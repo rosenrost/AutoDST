@@ -2,13 +2,13 @@
 #define DST_H
 
 
-#ifndef LANGFILE
-#define LANGFILE  "lang/en_US.h"
-#endif /* !defined LANGFILE */
-
-
 #include <time.h>
-#include LANGFILE
+
+#ifndef VERSION
+# define VERSION  "0"
+#endif /* !defined VERSION */
+
+#include "lang.h"
 
 
 /* C library */
