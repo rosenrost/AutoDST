@@ -90,9 +90,10 @@ clean-all:
 	for lang in $(ALL_LANGUAGES); do $(MAKE) LANGUAGE=$$lang clean; done
 
 clean-$(LANGUAGE):
-	$(ECHON) "Removing object files for $(LANGUAGE). "
+	$(ECHON) "Removing object files and binaries for $(LANGUAGE). "
 	$(RM) $(OBJ_ACC) $(OBJ_PRG)
 	$(RM) $(LANG_H)
+	$(RM) -r $(EXECDIR)
 	$(ECHO)
 
 depend dep:
