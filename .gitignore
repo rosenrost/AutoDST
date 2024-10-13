@@ -1,4 +1,5 @@
 .vscode/*
+bins/*
 release/*
 .depend
 *.o
