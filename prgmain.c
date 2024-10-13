@@ -17,6 +17,8 @@ int main()
 {
     int rc = 1;
 
+    *g_logfile = BOOTDRIVE;
+
     atexit(clean_exit);
     output(NEWLINE REV_ON "AutoDST v" VERSION REV_OFF NEWLINE);
 

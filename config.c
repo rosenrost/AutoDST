@@ -43,7 +43,7 @@ int read_config()
                 char* crlf;
 
                 /* Remove trailing CRLF */
-                crlf = strstr(line, NEWLINE);
+                crlf = strpbrk(line, NEWLINE);
                 if (crlf != NULL) {
                     *crlf = '\0';
                 }

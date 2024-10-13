@@ -4,8 +4,8 @@
 #include "autodst.h"
 
 
-char* m_auto_prg = "@:\\AUTO\\" AUTO_PRG;
 char* g_logfile  = "@:\\" LOGFILE;
+char* m_auto_prg = "@:\\AUTO\\" AUTO_PRG;
 
 
 static int auto_prg_exists(void);
@@ -25,6 +25,7 @@ int main()
     short menu_id = -1;
 
     wind_update(BEG_UPDATE);
+    *g_logfile  = BOOTDRIVE;
     *m_auto_prg = BOOTDRIVE;
 
     if (!auto_prg_exists()) {
