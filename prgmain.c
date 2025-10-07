@@ -10,7 +10,6 @@ char* g_logfile = "@:\\" LOGFILE;
 static void clean_exit(void);
 static void output(const char* s);
 static void output_time(const char* prompt, const char* timestr, const char* tz);
-static void pause(unsigned int sec);
 
 
 int main()
@@ -30,24 +29,24 @@ int main()
         Status      curr_status;
 
         rc = 0;
-        tz = (g_status == DST_ON) ? g_tzdst : g_tzstd;
+        tz = (g_config.status == DST_ON) ? g_config.tzdst : g_config.tzstd;
 
         write_log(TXT_CONFIG_LOADED);
         write_config_log();
 
         output_time(TXT_CURRENT_TIME, format_time(FMT_WD_DATETIME, time(NULL)), tz);
-        output_time(TXT_BEGINNING_OF_DST, format_time(FMT_WD_DATETIME, g_rule_from.next_change), NULL);
-        output_time(TXT_END_OF_DST, format_time(FMT_WD_DATETIME, g_rule_to.next_change), NULL);
+        output_time(TXT_BEGINNING_OF_DST, format_time(FMT_WD_DATETIME, g_config.rule_from.next_change), NULL);
+        output_time(TXT_END_OF_DST, format_time(FMT_WD_DATETIME, g_config.rule_to.next_change), NULL);
         output_time(TXT_NEXT_CHANGE, format_time(FMT_WD_DATETIME, get_next_change(NULL)), NULL);
 
-        if (g_next_change == g_rule_from.next_change) {
+        if (g_next_change == g_config.rule_from.next_change) {
             /* Next change will switch to DST => current time is standard time */
             curr_status = DST_OFF;
-        } else if (g_next_change == g_rule_to.next_change) {
+        } else if (g_next_change == g_config.rule_to.next_change) {
             /* Next change will switch to standard time => current time is DST */
             curr_status = DST_ON;
         } else {
-            curr_status = g_status;
+            curr_status = g_config.status;
         }
 
         update_clock(curr_status);
@@ -61,8 +60,6 @@ int main()
 
         output(errtext);
     }
-
-    pause(1);
 
     return rc;
 }
@@ -92,11 +89,4 @@ void output_time(const char* prompt, const char* timestr, const char* tz)
         output(tz);
     }
     output(NEWLINE);
-}
-
-
-void pause(unsigned int sec)
-{
-    clock_t end = clock() + (sec * CLOCKS_PER_SEC);
-    do {} while (clock() < end);
 }

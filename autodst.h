@@ -19,8 +19,9 @@ extern short _app;
 #define NEWLINE         "\r\n"
 #define IS_NEWLINE(c)   ((c) == '\r' || (c) == '\n')
 #define AUTO_PRG        "AUTODST.PRG"
-#define CONFIG          "AUTODST.INI"
-#define CONFIG_BAK      "AUTODST.BAK"
+#define INI             "AUTODST.INI"
+#define INI_BAK         "AUTODST.BAK"
+#define CFG             "AUTODST.CFG"
 #define LOGFILE         "AUTODST.LOG"
 #define MENU_TITLE      "Auto DST"
 #define VARNAME_STATUS  "status"
@@ -69,20 +70,23 @@ typedef struct
 {
      unsigned int line;
      const char* text;
+} IniFile;
+
+typedef unsigned char Status;
+
+typedef struct
+{
+    Status status;
+    #define DST_OFF  0
+    #define DST_ON   1
+    #define INVALID  0xff
+    Rule   rule_from;
+    Rule   rule_to;
+    char   tzstd[MAXLEN_TZ + 1];
+    char   tzdst[MAXLEN_TZ + 1];
 } Config;
 
-
-#define DST_OFF  0
-#define DST_ON   1
-#define INVALID  0xff
-typedef unsigned char Status;
-extern Status g_status;
-
-extern char g_tzstd[MAXLEN_TZ + 1];
-extern char g_tzdst[MAXLEN_TZ + 1];
-
-extern Rule g_rule_from;
-extern Rule g_rule_to;
+extern Config g_config;
 
 extern long g_loghdl;
 
@@ -93,10 +97,8 @@ extern const char* g_conf_mday[12];
 
 enum { VAR_STATUS, VAR_BEGIN, VAR_END, VAR_TZSTD, VAR_TZDST };
 
-extern Config g_config;
-
-extern char*  g_config_file;
-extern char*  g_config_bak;
+extern char*  g_ini_file;
+extern char*  g_ini_bak;
 extern char*  g_logfile;
 
 
@@ -104,6 +106,7 @@ void update_clock(Status new_status);
 time_t get_rule_time(const Rule* rule, int year);
 time_t get_next_change(const Rule* rule);
 int read_config(void);
+void write_new_status(void);
 int get_value(const char* line, char* dest);
 char* skipws(const char* s);
 char* read_line(char* s, long n, long handle);

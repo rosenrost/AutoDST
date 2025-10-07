@@ -86,7 +86,7 @@
 #define TXT_NEXT_CHANGE                   "NÑchste Umstellung:  "
 
 /* config.c */
-#define TXT_ERR_CONFIG_NOT_READ           ERROR_PREFIX "Konfigurationsdatei " CONFIG " kann nicht gelesen werden." NEWLINE
+#define TXT_ERR_CONFIG_NOT_READ           ERROR_PREFIX "Konfigurationsdatei " INI " kann nicht gelesen werden." NEWLINE
 #define TXT_ERR_SYNTAX_ERROR              ERROR_PREFIX "Syntax-Fehler in Zeile "
 #define TXT_ERR_BEGIN_RULE_MISSING        ERROR_PREFIX "Regel fÅr Anfang der Sommerzeit fehlt." NEWLINE
 #define TXT_ERR_END_RULE_MISSING          ERROR_PREFIX "Regel fÅr Ende der Sommerzeit fehlt." NEWLINE
@@ -102,8 +102,9 @@
 /* rules.c */
 #define TXT_SWITCHING_TO_DST              "Stelle auf Sommerzeit." NEWLINE
 #define TXT_SWITCHING_TO_STD              "Stelle auf Winterzeit." NEWLINE
-#define TXT_ERR_CANNOT_CREATE_CONFIG_BAK  ERROR_PREFIX "Kann " CONFIG_BAK " nicht anlegen." NEWLINE
-#define TXT_ERR_CANNOT_CREATE_NEW_CONFIG  ERROR_PREFIX "Kann neue " CONFIG " nicht anlegen." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_CONFIG_BAK  ERROR_PREFIX "Kann " INI_BAK " nicht anlegen." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_NEW_CONFIG  ERROR_PREFIX "Kann neue " INI " nicht anlegen." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_CFG         ERROR_PREFIX "Kann " CFG " nicht anlegen." NEWLINE
 
 
 #endif /* LANG_DE_DE_H */

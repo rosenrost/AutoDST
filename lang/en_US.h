@@ -86,7 +86,7 @@
 #define TXT_NEXT_CHANGE                   "Next change:      "
 
 /* config.c */
-#define TXT_ERR_CONFIG_NOT_READ           ERROR_PREFIX "Configuration file " CONFIG " cannot be read." NEWLINE
+#define TXT_ERR_CONFIG_NOT_READ           ERROR_PREFIX "Configuration file " INI " cannot be read." NEWLINE
 #define TXT_ERR_SYNTAX_ERROR              ERROR_PREFIX "Syntax error in configuration line "
 #define TXT_ERR_BEGIN_RULE_MISSING        ERROR_PREFIX "Rule for beginning of DST missing." NEWLINE
 #define TXT_ERR_END_RULE_MISSING          ERROR_PREFIX "Rule for end of DST missing." NEWLINE
@@ -102,8 +102,9 @@
 /* rules.c */
 #define TXT_SWITCHING_TO_DST              "Switching to DST." NEWLINE
 #define TXT_SWITCHING_TO_STD              "Switching to STD." NEWLINE
-#define TXT_ERR_CANNOT_CREATE_CONFIG_BAK  ERROR_PREFIX "Cannot create " CONFIG_BAK "." NEWLINE
-#define TXT_ERR_CANNOT_CREATE_NEW_CONFIG  ERROR_PREFIX "Cannot create new " CONFIG "." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_CONFIG_BAK  ERROR_PREFIX "Cannot create " INI_BAK "." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_NEW_CONFIG  ERROR_PREFIX "Cannot create new " INI "." NEWLINE
+#define TXT_ERR_CANNOT_CREATE_CFG         ERROR_PREFIX "Cannot create " CFG "." NEWLINE
 
 
 #endif /* LANG_EN_US_H */

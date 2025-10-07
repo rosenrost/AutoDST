@@ -57,7 +57,7 @@ int main()
                 write_config_log();
                 acc_loop = dst_loop;
             } else {
-                g_status = INVALID;
+                g_config.status = INVALID;
             }
         }
     }
@@ -93,13 +93,13 @@ void clean_exit()
 
 void dst_loop(short menu_id)
 {
-    Status status = g_status;
+    Status status = g_config.status;
 
     /* Check for change in the past */
-    if (g_next_change == g_rule_from.next_change) {
+    if (g_next_change == g_config.rule_from.next_change) {
         /* Next change will switch to DST => current time is standard time */
         status = DST_OFF;
-    } else if (g_next_change == g_rule_to.next_change) {
+    } else if (g_next_change == g_config.rule_to.next_change) {
         /* Next change will switch to standard time => current time is DST */
         status = DST_ON;
     } else {
@@ -119,12 +119,12 @@ void dst_loop(short menu_id)
         if (now >= g_next_change) {
             /* Switch to/from DST */
 
-            Status status = g_status;
+            Status status = g_config.status;
 
-            if (g_next_change == g_rule_from.next_change) {
+            if (g_next_change == g_config.rule_from.next_change) {
                 /* Switch to DST */
                 status = DST_ON;
-            } else if (g_next_change == g_rule_to.next_change) {
+            } else if (g_next_change == g_config.rule_to.next_change) {
                 /* Switch to standard time */
                 status = DST_OFF;
             } else {
@@ -181,20 +181,20 @@ void show_status()
 {
     char text[256];
 
-    if (g_status == INVALID) {
+    if (g_config.status == INVALID) {
         strcpy(text, TXT_ALERT_CONFIG_ERROR);
     } else {
         const char* currtz;
         const char* nexttz;
         const char* swline;
 
-        if (g_status == DST_ON) {
-            currtz = g_tzdst;
-            nexttz = g_tzstd;
+        if (g_config.status == DST_ON) {
+            currtz = g_config.tzdst;
+            nexttz = g_config.tzstd;
             swline = TXT_STATUS_SWITCH_BACK_TO " ";
         } else {
-            currtz = g_tzstd;
-            nexttz = g_tzdst;
+            currtz = g_config.tzstd;
+            nexttz = g_config.tzdst;
             swline = TXT_STATUS_SWITCH_TO " ";
         }
 

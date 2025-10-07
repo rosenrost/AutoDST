@@ -42,6 +42,8 @@ Also note the following rules:
 * Lines starting with "#" are considered comments and are therefore also ignored.
 * It is not possible to add comments at the end of a line.
 
+After reading and evaluating ``AUTODST.INI``, the result is saved in binary format in ``AUTODST.CFG``. This eliminates the need to completely parse the ``INI`` file the next time it is started; instead, the configuration is read directly from the small ``CFG`` file. It is only used when a change has been made to the ``INI`` file (i.e., the ``INI`` file is newer than the ``CFG`` file).
+
 ## Rules ##
 
 Each rule consists of three fields separated by spaces: day, month, time (24-hour format).

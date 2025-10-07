@@ -139,7 +139,9 @@ $(INI):
 $(OBJDIR):
 	$(MKDIR) $(OBJDIR)
 
-$(OBJDIR)/%.o:	%.c
+$(OBJDIR)/%.o:	%.c VERSION
 	$(CC) $(CFLAGS) $(OPTFLAGS) -c $< -o $@
+
+%.c:	VERSION
 
 -include $(DEPEND)

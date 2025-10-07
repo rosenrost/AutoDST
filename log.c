@@ -59,7 +59,7 @@ void write_time_log(const char* prompt, time_t t, const char* tz, const char* su
 {
     write_log(prompt);
     write_log(format_time(FMT_WD_DATETIME, t));
-    if (tz != NULL && g_status != INVALID) {
+    if (tz != NULL && g_config.status != INVALID) {
         write_log(" ");
         write_log(tz);
     }
@@ -77,8 +77,8 @@ void write_config_log()
 
 void write_rules_log()
 {
-    write_time_log(TXT_BEGINNING_OF_DST, g_rule_from.next_change, NULL, NEWLINE);
-    write_time_log(TXT_END_OF_DST, g_rule_to.next_change, NULL, NEWLINE);
+    write_time_log(TXT_BEGINNING_OF_DST, g_config.rule_from.next_change, NULL, NEWLINE);
+    write_time_log(TXT_END_OF_DST, g_config.rule_to.next_change, NULL, NEWLINE);
     write_time_log(TXT_NEXT_CHANGE, g_next_change, NULL, NEWLINE);
 }
 
