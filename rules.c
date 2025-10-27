@@ -68,7 +68,7 @@ time_t get_next_change(const Rule* rule)
     time_t     tr;
 
     if (rule == NULL) {
-        rule = (g_config.status == DST_OFF) ? &g_config.rule_from : &g_config.rule_to;
+        rule = (g_config.rule_from.next_change < g_config.rule_to.next_change) ? &g_config.rule_from : &g_config.rule_to;
     }
 
     if (m_last_change >= 0L) {
@@ -77,7 +77,6 @@ time_t get_next_change(const Rule* rule)
     } else {
         now = time(NULL);
     }
-
 
     tm   = localtime(&now);
     year = tm->tm_year + 1900;
