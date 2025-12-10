@@ -39,7 +39,7 @@ int read_config()
         *g_cfg_file = BOOTDRIVE;
     }
 
-    if (ini_changed()) {
+    if (ini_changed() || !read_cfg_file()) {
         hdl = Fopen(g_ini_file, FO_READ);
 
         if (hdl < 0) {
