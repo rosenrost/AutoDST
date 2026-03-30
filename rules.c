@@ -51,8 +51,8 @@ void update_clock(Status new_status)
         Tsettime(tostime);
 
         g_config.status   = new_status;
-        g_next_change     = get_next_change(NULL);
         rule->next_change = get_next_change(rule);
+        g_next_change     = get_next_change(NULL);
 
         write_rules_log();
         write_new_status();
