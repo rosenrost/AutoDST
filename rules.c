@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <string.h>
 #include "autodst.h"
 
@@ -5,89 +6,100 @@
 const char* g_conf_wday[7]  = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 const char* g_conf_mday[12] = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
-time_t g_next_change = -1L;
-
-static time_t m_last_change = -1L;
-
 /* Year range is from 1980 to 2099, so no century can occur which is not a leap year
 #define is_leap(y)  ((y) % 4 == 0 && ((y) % 100 != 0 || (y) % 400 == 0))
 */
 #define is_leap(y)  ((y) % 4 == 0)
 
 
-void update_clock(Status new_status)
-{
-    if (g_config.status != new_status) {
-        time_t         offset;
-        time_t         t;
-        struct tm*     tm;
-        unsigned short tosdate;
-        unsigned short tostime;
-        Rule*          rule;
+static time_t get_rule_time(const Rule* rule, int year);
 
-        if (new_status == DST_ON) {
-            write_log(TXT_SWITCHING_TO_DST);
-            rule   = &g_config.rule_from;
-            offset = 3600L;
+
+/* Check for change and - if not - return seconds until next change */
+long check_date()
+{
+    static time_t next_check = LONG_MIN;
+
+    time_t now = time(NULL);
+    long   ret = 0L;
+
+    if (now > next_check) {
+        Status    status = g_config.status;
+        struct tm *tm;
+        int       year;
+        time_t    todst;
+        time_t    tostd;
+
+        tm    = localtime(&now);
+        year  = tm->tm_year + 1900;
+        todst = get_rule_time(&g_config.rule_dst, year);
+        tostd = get_rule_time(&g_config.rule_std, year);
+
+        if (todst < tostd) {
+            /* Northern hemisphere: DST starts in spring and ends in autumn */
+            if (now >= todst && now < tostd) {
+                status = DST_ON;
+            } else {
+                status = DST_OFF;
+            }
         } else {
-            write_log(TXT_SWITCHING_TO_STD);
-            rule   = &g_config.rule_to;
-            offset = -3600L;
+            /* Southern hemisphere: DST starts in autumn and ends in spring */
+            if (now >= tostd && now < todst) {
+                status = DST_OFF;
+            } else {
+                status = DST_ON;
+            }
         }
 
-        m_last_change = g_next_change;
-        t             = time(NULL) + offset;
-        tm            = localtime(&t);
-        tosdate       = (tm->tm_mday & 0x1f)
-                      + (((tm->tm_mon + 1) & 0xf) << 5)
-                      + ((tm->tm_year - 80) << 9)
-                      ;
-        tostime       = ((tm->tm_sec / 2) & 0x1f)
-                      + ((tm->tm_min & 0x3f) << 5)
-                      + ((tm->tm_hour & 0x1f) << 11)
-                      ;
+        if (status != g_config.status) {
+            time_t         offset;
+            time_t         t;
+            struct tm*     tm;
+            unsigned short tosdate;
+            unsigned short tostime;
 
-        Tsetdate(tosdate);
-        Tsettime(tostime);
+            if (status == DST_ON) {
+                write_log(TXT_SWITCHING_TO_DST);
+                offset = 3600L;
+            } else {
+                write_log(TXT_SWITCHING_TO_STD);
+                offset = -3600L;
+            }
 
-        g_config.status   = new_status;
-        g_next_change     = get_next_change(NULL);
-        rule->next_change = get_next_change(rule);
+            t       = time(NULL) + offset;
+            tm      = localtime(&t);
+            tosdate = (tm->tm_mday & 0x1f)
+                    + (((tm->tm_mon + 1) & 0xf) << 5)
+                    + ((tm->tm_year - 80) << 9)
+                    ;
+            tostime = ((tm->tm_sec / 2) & 0x1f)
+                    + ((tm->tm_min & 0x3f) << 5)
+                    + ((tm->tm_hour & 0x1f) << 11)
+                    ;
 
-        write_rules_log();
-        write_new_status();
-    }
-}
+            Tsetdate(tosdate);
+            Tsettime(tostime);
 
+            g_config.status = status;
 
-time_t get_next_change(const Rule* rule)
-{
-    time_t     now;
-    struct tm* tm;
-    int        year;
-    time_t     tr;
+            write_rules_log(0);
+            write_new_status();
 
-    if (rule == NULL) {
-        rule = (g_config.rule_from.next_change < g_config.rule_to.next_change) ? &g_config.rule_from : &g_config.rule_to;
-    }
+            next_check = now;
 
-    if (m_last_change >= 0L) {
-        /* Search from one day after last change */
-        now = m_last_change + 86400L;
-    } else {
-        now = time(NULL);
-    }
+            if (offset < 0L) {
+                ret = -offset;
+            }
+        } else {
+            time_t nextdst = get_next_rule_time(&g_config.rule_dst);
+            time_t nextstd = get_next_rule_time(&g_config.rule_std);
+            time_t next    = (nextdst < nextstd) ? nextdst : nextstd;
 
-    tm   = localtime(&now);
-    year = tm->tm_year + 1900;
-    tr   = get_rule_time(rule, year);
-
-    if (tr < now) {
-        /* Rule will match next year */
-        tr = get_rule_time(rule, year + 1);
+            ret = next - now;
+        }
     }
 
-    return tr;
+    return ret;
 }
 
 
@@ -148,4 +160,18 @@ time_t get_rule_time(const Rule* rule, int year)
     t = mktime(ltm) + rule->hour * 3600L + rule->minute;
 
     return t;
+}
+
+
+time_t get_next_rule_time(const Rule* rule)
+{
+    time_t now  = time(NULL);
+    int    year = localtime(&now)->tm_year + 1900;
+    time_t next = get_rule_time(rule, year);
+
+    if (next < now) {
+        next = get_rule_time(rule, year + 1);
+    }
+
+    return next;
 }

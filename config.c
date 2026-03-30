@@ -14,8 +14,8 @@ char* g_cfg_file = "@:\\" CFG;
 Config g_config =
 {
     INVALID,
-    { 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0 },
     "STD",
     "DST"
 };
@@ -74,10 +74,10 @@ int read_config()
 
                         switch (var) {
                             case VAR_BEGIN:
-                                rule = &g_config.rule_from;
+                                rule = &g_config.rule_dst;
                                 break;
                             case VAR_END:
-                                rule = &g_config.rule_to;
+                                rule = &g_config.rule_std;
                                 break;
                             default:
                                 break;
@@ -120,26 +120,23 @@ int read_config()
             Fclose(hdl);
 
             if (ret) {
-                if (!g_config.rule_from.found) {
+                if (!g_config.rule_dst.found) {
                     ret = 0;
                     write_log(TXT_ERR_BEGIN_RULE_MISSING);
                 }
 
-                if (!g_config.rule_to.found) {
+                if (!g_config.rule_std.found) {
                     ret = 0;
                     write_log(TXT_ERR_END_RULE_MISSING);
                 }
             }
         }
+
+        if (ret) {
+            write_cfg_file();
+        }
     } else {
         ret = read_cfg_file();
-    }
-
-    if (ret) {
-        g_config.rule_from.next_change = get_next_change(&g_config.rule_from);
-        g_config.rule_to.next_change   = get_next_change(&g_config.rule_to);
-        g_next_change                  = get_next_change(NULL);
-        write_cfg_file();
     }
 
     return ret;

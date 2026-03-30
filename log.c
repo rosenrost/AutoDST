@@ -71,15 +71,22 @@ void write_time_log(const char* prompt, time_t t, const char* tz, const char* su
 
 void write_config_log()
 {
-    write_rules_log();
+    write_rules_log(1);
 }
 
 
-void write_rules_log()
+void write_rules_log(int full)
 {
-    write_time_log(TXT_BEGINNING_OF_DST, g_config.rule_from.next_change, NULL, NEWLINE);
-    write_time_log(TXT_END_OF_DST, g_config.rule_to.next_change, NULL, NEWLINE);
-    write_time_log(TXT_NEXT_CHANGE, g_next_change, NULL, NEWLINE);
+    time_t nextdst = get_next_rule_time(&g_config.rule_dst);
+    time_t nextstd = get_next_rule_time(&g_config.rule_std);
+    time_t next    = (nextdst < nextstd) ? nextdst : nextstd;
+
+    if (full) {
+        write_time_log(TXT_BEGINNING_OF_DST, nextdst, NULL, NEWLINE);
+        write_time_log(TXT_END_OF_DST, nextstd, NULL, NEWLINE);
+    }
+
+    write_time_log(TXT_NEXT_CHANGE, next, NULL, NEWLINE);
 }
 
 
