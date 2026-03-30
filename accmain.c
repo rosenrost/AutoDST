@@ -4,9 +4,6 @@
 #include "autodst.h"
 
 
-#define DEFAULT_SLEEP  60L
-
-
 char* g_logfile  = "@:\\" LOGFILE;
 char* m_auto_prg = "@:\\AUTO\\" AUTO_PRG;
 
@@ -15,6 +12,7 @@ static int auto_prg_exists(void);
 static void clean_exit(void);
 static void dst_loop(short menu_id);
 static void err_loop(short menu_id);
+static void do_update_clock(Status status);
 static void show_status(void);
 
 static void (*acc_loop)(short menu_id) = err_loop;
@@ -95,15 +93,51 @@ void clean_exit()
 
 void dst_loop(short menu_id)
 {
+    Status status = g_config.status;
+
+    /* Check for change in the past */
+    if (g_next_change == g_config.rule_from.next_change) {
+        /* Next change will switch to DST => current time is standard time */
+        status = DST_OFF;
+    } else if (g_next_change == g_config.rule_to.next_change) {
+        /* Next change will switch to standard time => current time is DST */
+        status = DST_ON;
+    } else {
+        goto main_loop;
+    }
+
+    do_update_clock(status);
+
+    main_loop:
+
     for (;;) {
-        long   sleep = DEFAULT_SLEEP * 1000L; /* Default: sleep for one minute */
+        time_t now   = time(NULL);
+        long   sleep = 60000L; /* Default: sleep for on minute */
         short  msg[8];
         short  evret;
 
-        if (check_date() <= 120L) {
+        if (now >= g_next_change) {
+            /* Switch to/from DST */
+
+            Status status = g_config.status;
+
+            if (g_next_change == g_config.rule_from.next_change) {
+                /* Switch to DST */
+                status = DST_ON;
+            } else if (g_next_change == g_config.rule_to.next_change) {
+                /* Switch to standard time */
+                status = DST_OFF;
+            } else {
+                goto event_loop;
+            }
+
+            do_update_clock(status);
+        } else if (g_next_change - now <= 120L) {
             /* Next change will be within two minutes, so only sleep for one second */
             sleep = 1000L;
         }
+
+        event_loop:
 
         evret = evnt_multi(MU_MESAG | MU_TIMER,
                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -135,6 +169,14 @@ void err_loop(short menu_id)
 }
 
 
+void do_update_clock(Status status)
+{
+    wind_update(BEG_UPDATE);
+    update_clock(status);
+    wind_update(END_UPDATE);
+}
+
+
 void show_status()
 {
     char text[256];
@@ -142,23 +184,18 @@ void show_status()
     if (g_config.status == INVALID) {
         strcpy(text, TXT_ALERT_CONFIG_ERROR);
     } else {
-        time_t     nextchg;
-        const char *currtz;
-        const char *nexttz;
-        const char *swline;
-
-        check_date();
+        const char* currtz;
+        const char* nexttz;
+        const char* swline;
 
         if (g_config.status == DST_ON) {
-            nextchg = get_next_rule_time(&g_config.rule_std);
-            currtz  = g_config.tzdst;
-            nexttz  = g_config.tzstd;
-            swline  = TXT_STATUS_SWITCH_BACK_TO " ";
+            currtz = g_config.tzdst;
+            nexttz = g_config.tzstd;
+            swline = TXT_STATUS_SWITCH_BACK_TO " ";
         } else {
-            nextchg = get_next_rule_time(&g_config.rule_dst);
-            currtz  = g_config.tzstd;
-            nexttz  = g_config.tzdst;
-            swline  = TXT_STATUS_SWITCH_TO " ";
+            currtz = g_config.tzstd;
+            nexttz = g_config.tzdst;
+            swline = TXT_STATUS_SWITCH_TO " ";
         }
 
         strcpy(text, "[0][" TXT_STATUS_CURR_DATE ":  |");
@@ -169,7 +206,7 @@ void show_status()
         strcat(text, swline);
         strcat(text, nexttz);
         strcat(text, ":  |");
-        strcat(text, format_time(FMT_DATETIME, nextchg));
+        strcat(text, format_time(FMT_DATETIME, g_next_change));
         strcat(text, "  ][" TXT_STATUS_OK_BUTTON "]");
     }
 

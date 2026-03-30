@@ -63,6 +63,7 @@ typedef struct
     unsigned int hour;
     unsigned int minute;
     unsigned int found;
+    time_t next_change;
 } Rule;
 
 typedef struct
@@ -79,8 +80,8 @@ typedef struct
     #define DST_OFF  0
     #define DST_ON   1
     #define INVALID  0xff
-    Rule   rule_dst;
-    Rule   rule_std;
+    Rule   rule_from;
+    Rule   rule_to;
     char   tzstd[MAXLEN_TZ + 1];
     char   tzdst[MAXLEN_TZ + 1];
 } Config;
@@ -88,6 +89,8 @@ typedef struct
 extern Config g_config;
 
 extern long g_loghdl;
+
+extern time_t g_next_change;
 
 extern const char* g_conf_wday[7];
 extern const char* g_conf_mday[12];
@@ -99,8 +102,9 @@ extern char*  g_ini_bak;
 extern char*  g_logfile;
 
 
-long check_date(void);
-time_t get_next_rule_time(const Rule* rule);
+void update_clock(Status new_status);
+time_t get_rule_time(const Rule* rule, int year);
+time_t get_next_change(const Rule* rule);
 int read_config(void);
 void write_new_status(void);
 int get_value(const char* line, char* dest);
@@ -111,7 +115,7 @@ const char* format_time(const char *fmt, time_t t);
 void close_log(void);
 void write_log(const char* s);
 void write_config_log(void);
-void write_rules_log(int full);
+void write_rules_log(void);
 const char* int2str(int n);
 
 

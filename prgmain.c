@@ -25,10 +25,8 @@ int main()
     write_log(TXT_EXECUTING_PRG);
 
     if (read_config()) {
-        time_t     nextdst = get_next_rule_time(&g_config.rule_dst);
-        time_t     nextstd = get_next_rule_time(&g_config.rule_std);
-        time_t     next    = (nextdst < nextstd) ? nextdst : nextstd;
-        const char *tz;
+        const char* tz;
+        Status      curr_status;
 
         rc = 0;
         tz = (g_config.status == DST_ON) ? g_config.tzdst : g_config.tzstd;
@@ -37,11 +35,21 @@ int main()
         write_config_log();
 
         output_time(TXT_CURRENT_TIME, format_time(FMT_WD_DATETIME, time(NULL)), tz);
-        output_time(TXT_BEGINNING_OF_DST, format_time(FMT_WD_DATETIME, nextdst), NULL);
-        output_time(TXT_END_OF_DST, format_time(FMT_WD_DATETIME, nextstd), NULL);
-        output_time(TXT_NEXT_CHANGE, format_time(FMT_WD_DATETIME, next), NULL);
+        output_time(TXT_BEGINNING_OF_DST, format_time(FMT_WD_DATETIME, g_config.rule_from.next_change), NULL);
+        output_time(TXT_END_OF_DST, format_time(FMT_WD_DATETIME, g_config.rule_to.next_change), NULL);
+        output_time(TXT_NEXT_CHANGE, format_time(FMT_WD_DATETIME, get_next_change(NULL)), NULL);
 
-        check_date();
+        if (g_next_change == g_config.rule_from.next_change) {
+            /* Next change will switch to DST => current time is standard time */
+            curr_status = DST_OFF;
+        } else if (g_next_change == g_config.rule_to.next_change) {
+            /* Next change will switch to standard time => current time is DST */
+            curr_status = DST_ON;
+        } else {
+            curr_status = g_config.status;
+        }
+
+        update_clock(curr_status);
     } else {
         char  errtext[] = TXT_ERR_CONFIG_NOT_LOADED;
         char* drvltr    = strchr(errtext, '@');
